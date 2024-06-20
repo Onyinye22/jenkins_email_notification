@@ -1,0 +1,82 @@
+pipeline {
+    agent any
+
+    environment {
+        RECIPIENT = 'estheronyinye22@gmail.com'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building...'
+                // Add your build steps here
+                sh 'echo "Building project..."'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+                // Add your test steps here
+                sh 'echo "Testing project..."'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
+                // Add your deploy steps here
+                sh 'echo "Deploying project..."'
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                emailext(
+                    subject: "Jenkins Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) - ${currentBuild.currentResult}",
+                    body: """
+                    <p>Job Name: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                    <p>Build Status: ${currentBuild.currentResult}</p>
+                    <p>Check console output at ${env.BUILD_URL} to view the results.</p>
+                    """,
+                    recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                    to: "${env.RECIPIENT}",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+        success {
+            script {
+                emailext(
+                    subject: "Jenkins Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) - SUCCESS",
+                    body: """
+                    <p>Job Name: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                    <p>Build Status: SUCCESS</p>
+                    <p>Check console output at ${env.BUILD_URL} to view the results.</p>
+                    """,
+                    recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                    to: "${env.RECIPIENT}",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+        failure {
+            script {
+                emailext(
+                    subject: "Jenkins Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) - FAILURE",
+                    body: """
+                    <p>Job Name: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                    <p>Build Status: FAILURE</p>
+                    <p>Check console output at ${env.BUILD_URL} to view the results.</p>
+                    """,
+                    recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                    to: "${env.RECIPIENT}",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+    }
+}
