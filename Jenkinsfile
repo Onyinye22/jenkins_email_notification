@@ -25,15 +25,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Archive Artifacts') {
-            steps {
-                script {
-                    // Archive the files you want to attach to the email
-                    archiveArtifacts artifacts: '**/*.log, **/target/*.jar', allowEmptyArchive: true
-                }
-            }
-        }
     }
 
     post {
@@ -49,7 +40,6 @@ pipeline {
                     """,
                     recipientProviders: [[$class: 'DevelopersRecipientProvider']],
                     to: "${env.RECIPIENTS}",
-                    attachmentsPattern: '**/*.log, **/target/*.jar',
                     mimeType: 'text/html'
                 )
             }
