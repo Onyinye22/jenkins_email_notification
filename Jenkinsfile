@@ -2,69 +2,73 @@ pipeline {
     agent any
 
     environment {
-        // Set email addresses for notification
-        RECIPIENTS = 'estheronyinye011@gmail.com, danielofurutech@gmail.com, goodnessm508@gmail.com.com, guddytechs@gmail.com'
-        SENDER = 'estheronyinye011@gmail.com'
+        // Define email-related environment variables
+        RECIPIENTS = 'estheronyinye011@gmail.com, goodnessm508@gmail.com, ijeonyinye22@gmail.com, danielofurutech@gmail.com, guddytechs@gmail.com'
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from the GitHub repository
+                git url: 'https://github.com/Goodyoma/jenkins-email-notification.git', branch: 'main'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building...'
-                // Your build steps go here
+                // Simulate a build step
+                sh 'echo "Building project..."'
             }
         }
+
         stage('Test') {
             steps {
                 echo 'Testing...'
-                // Your test steps go here
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-                // Your deploy steps go here
+                // Simulate a test step
+                sh 'echo "Running tests..."'
             }
         }
     }
 
     post {
+        always {
+            // Send an email notification after every build
+            script {
+                emailext(
+                    subject: "Jenkins Job: ${currentBuild.fullDisplayName}",
+                    body: """<p>Build ${currentBuild.fullDisplayName} has completed.</p>
+                             <p>Result: ${currentBuild.currentResult}</p>
+                             <p>Check console output at <a href="${env.BUILD_URL}">${env.BUILD_URL}</a> to view the results.</p>""",
+                    recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider']],
+                    to: "${env.RECIPIENTS}",
+                    mimeType: 'text/html'
+                )
+            }
+        }
         success {
             script {
                 emailext(
-                    subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: """<p>Good news!</p>
-                             <p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> was successful.</p>
-                             <p>Check the details <a href="${env.BUILD_URL}">here</a>.</p>""",
+                    subject: "SUCCESS: Jenkins Job ${currentBuild.fullDisplayName}",
+                    body: """<p>Build ${currentBuild.fullDisplayName} was successful.</p>
+                             <p>Result: ${currentBuild.currentResult}</p>
+                             <p>Check console output at <a href="${env.BUILD_URL}">${env.BUILD_URL}</a> to view the results.</p>""",
                     recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                    to: "${RECIPIENTS}",
-                    from: "${SENDER}"
+                    to: "${env.RECIPIENTS}",
+                    mimeType: 'text/html'
                 )
             }
         }
         failure {
             script {
                 emailext(
-                    subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: """<p>Unfortunately,</p>
-                             <p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> failed.</p>
-                             <p>Check the details <a href="${env.BUILD_URL}">here</a>.</p>""",
-                    recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                    to: "${RECIPIENTS}",
-                    from: "${SENDER}"
-                )
-            }
-        }
-        always {
-            script {
-                emailext(
-                    subject: "Jenkins Build Completed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: """<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> has completed.</p>
+                    subject: "FAILURE: Jenkins Job ${currentBuild.fullDisplayName}",
+                    body: """<p>Build ${currentBuild.fullDisplayName} failed.</p>
                              <p>Result: ${currentBuild.currentResult}</p>
-                             <p>Check the details <a href="${env.BUILD_URL}">here</a>.</p>""",
+                             <p>Check console output at <a href="${env.BUILD_URL}">${env.BUILD_URL}</a> to view the results.</p>""",
                     recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                    to: "${RECIPIENTS}",
-                    from: "${SENDER}"
+                    to: "${env.RECIPIENTS}",
+                    mimeType: 'text/html'
                 )
             }
         }
