@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout the code from the GitHub repository
-                git url: 'https://github.com/Goodyoma/jenkins-email-notification.git', branch: 'main'
+                git url: 'https://github.com/Onyinye22/jenkins_email_notification.git', branch: 'main'
             }
         }
 
